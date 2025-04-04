@@ -93,24 +93,25 @@ def upload_files():
         elif filename.lower().endswith(".pdf"):
             temp_pdfs.append(filepath)
 
+    for pdf_path in temp_pdfs:
+        pdf_merger.append(pdf_path)
+
     final_pdf_path = os.path.join(TEMP_PDF_FOLDER, output_name)
     pdf_merger.write(final_pdf_path)
     pdf_merger.close()
 
-    response = send_file(final_pdf_path, as_attachment=True)
+    return send_file(final_pdf_path, as_attachment=True)
 
-    @app.after_request
-    def cleanup(response):
-        try:
-            shutil.rmtree(UPLOAD_FOLDER)
-            shutil.rmtree(TEMP_PDF_FOLDER)
-        except Exception as e:
-            app.logger.error(f"Erro ao limpar pastas: {e}")
-        finally:
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            os.makedirs(TEMP_PDF_FOLDER, exist_ok=True)
-        return response
-
+@app.after_request
+def cleanup(response):
+    try:
+        shutil.rmtree(UPLOAD_FOLDER)
+        shutil.rmtree(TEMP_PDF_FOLDER)
+    except Exception as e:
+        app.logger.error(f"Erro ao limpar pastas: {e}")
+    finally:
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        os.makedirs(TEMP_PDF_FOLDER, exist_ok=True)
     return response
 
 if __name__ == "__main__":
